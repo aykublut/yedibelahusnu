@@ -19,7 +19,7 @@ export default function QuizApp() {
     finishQuiz,
     restartQuiz,
     retryWrongAnswers,
-    shuffleQuestions, // YENİ: Store'dan çektik
+    shuffleQuestions,
   } = useQuizStore();
 
   const [mounted, setMounted] = useState(false);
@@ -41,10 +41,6 @@ export default function QuizApp() {
   const correctAnswersCount = questions.filter(
     (q) => userAnswers[q.id] === q.correctAnswer,
   ).length;
-  const accuracy =
-    totalAnswered > 0
-      ? Math.round((correctAnswersCount / totalAnswered) * 100)
-      : 0;
   const progressPercentage =
     currentQuestionsList.length > 0
       ? ((activeQuestionIndex + 1) / currentQuestionsList.length) * 100
@@ -93,7 +89,6 @@ export default function QuizApp() {
     );
   }
 
-  // === SONUÇ EKRANI ===
   if (isQuizFinished) {
     const currentListWrongCount = currentQuestionsList.filter(
       (q) => userAnswers[q.id] !== q.correctAnswer,
@@ -157,7 +152,18 @@ export default function QuizApp() {
     );
   }
 
-  // === TEST EKRANI ===
+  // Akıllı Soru Metni Boyutlandırması
+  const qLen = currentQuestion?.questionText.length || 0;
+  let qTextSize =
+    "text-[clamp(1.1rem,2.8dvh,1.75rem)] mb-[clamp(1rem,3dvh,2.5rem)]";
+  if (qLen > 250) {
+    qTextSize =
+      "text-[clamp(0.9rem,1.8dvh,1.1rem)] mb-[clamp(0.5rem,1.5dvh,1.5rem)] leading-snug";
+  } else if (qLen > 120) {
+    qTextSize =
+      "text-[clamp(1rem,2.2dvh,1.35rem)] mb-[clamp(0.75rem,2dvh,2rem)] leading-tight";
+  }
+
   return (
     <div className="h-[100dvh] w-full bg-[#050505] text-slate-200 flex flex-col overflow-hidden relative selection:bg-indigo-500/30">
       <div className="absolute top-0 left-0 w-full h-1 bg-white/5 z-50">
@@ -179,7 +185,6 @@ export default function QuizApp() {
             {isWrongAnswersMode ? "Hata Modu" : "Aktif Test"}
           </span>
 
-          {/* SADECE 1. SORUDA ÇIKAN KARIŞTIR BUTONU */}
           {!isWrongAnswersMode && activeQuestionIndex === 0 && (
             <button
               onClick={shuffleQuestions}
@@ -209,94 +214,119 @@ export default function QuizApp() {
       </div>
 
       <div className="flex-1 min-h-0 w-full max-w-3xl mx-auto flex flex-col px-4 pb-4 sm:px-6 z-10">
-        <div className="flex-1 min-h-0 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-[clamp(1rem,3dvh,2.5rem)] flex flex-col shadow-2xl relative">
-          {currentQuestion && (
-            <>
-              <div className="shrink-0 mb-[clamp(1rem,3dvh,2.5rem)]">
-                <h2 className="text-[clamp(1.1rem,2.8dvh,1.75rem)] font-semibold text-slate-100 leading-[1.3] tracking-tight">
-                  {currentQuestion.questionText}
-                </h2>
-              </div>
-              <div className="flex-1 min-h-0 flex flex-col justify-center gap-[clamp(0.5rem,1.5dvh,1rem)]">
-                {currentQuestion.options.map((option, index) => {
-                  const isSelected = userAnswers[currentQuestion.id] === option;
-                  const isCorrectAnswer =
-                    option === currentQuestion.correctAnswer;
-                  let baseStyle =
-                    "border-white/5 bg-white/[0.03] text-slate-300 hover:border-indigo-500/30 hover:bg-indigo-500/10";
-                  let icon = null;
+        <div className="flex-1 min-h-0 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-[clamp(1rem,3dvh,2.5rem)] flex flex-col shadow-2xl relative overflow-hidden">
+          {/* Çok uzun içeriklerde 100dvh bozmamak için overflow-y-auto eklendi */}
+          <div
+            className="flex-1 flex flex-col justify-center overflow-y-auto overscroll-contain pr-1 -mr-1 
+            [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20"
+          >
+            {currentQuestion && (
+              <>
+                <div className="shrink-0">
+                  <h2
+                    className={`font-semibold text-slate-100 tracking-tight transition-all ${qTextSize}`}
+                  >
+                    {currentQuestion.questionText}
+                  </h2>
+                </div>
+                <div className="flex flex-col gap-[clamp(0.4rem,1.2dvh,0.8rem)]">
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected =
+                      userAnswers[currentQuestion.id] === option;
+                    const isCorrectAnswer =
+                      option === currentQuestion.correctAnswer;
+                    let baseStyle =
+                      "border-white/5 bg-white/[0.03] text-slate-300 hover:border-indigo-500/30 hover:bg-indigo-500/10";
+                    let icon = null;
 
-                  if (hasAnswered) {
-                    if (isCorrectAnswer) {
-                      baseStyle =
-                        "border-emerald-500/50 bg-emerald-500/10 text-emerald-300 z-10 scale-[1.02] shadow-[0_0_20px_rgba(16,185,129,0.15)]";
-                      icon = (
-                        <svg
-                          className="w-[clamp(1.2rem,2.5dvh,1.5rem)] h-[clamp(1.2rem,2.5dvh,1.5rem)] text-emerald-400 shrink-0"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2.5"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      );
-                    } else if (isSelected && !isCorrectAnswer) {
-                      baseStyle =
-                        "border-rose-500/50 bg-rose-500/10 text-rose-300 opacity-90";
-                      icon = (
-                        <svg
-                          className="w-[clamp(1.2rem,2.5dvh,1.5rem)] h-[clamp(1.2rem,2.5dvh,1.5rem)] text-rose-400 shrink-0"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2.5"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      );
-                    } else {
-                      baseStyle =
-                        "border-transparent bg-white/[0.01] text-slate-600 opacity-30 grayscale";
+                    if (hasAnswered) {
+                      if (isCorrectAnswer) {
+                        baseStyle =
+                          "border-emerald-500/50 bg-emerald-500/10 text-emerald-300 z-10 scale-[1.02] shadow-[0_0_20px_rgba(16,185,129,0.15)]";
+                        icon = (
+                          <svg
+                            className="w-[clamp(1.2rem,2.5dvh,1.5rem)] h-[clamp(1.2rem,2.5dvh,1.5rem)] text-emerald-400 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        );
+                      } else if (isSelected && !isCorrectAnswer) {
+                        baseStyle =
+                          "border-rose-500/50 bg-rose-500/10 text-rose-300 opacity-90";
+                        icon = (
+                          <svg
+                            className="w-[clamp(1.2rem,2.5dvh,1.5rem)] h-[clamp(1.2rem,2.5dvh,1.5rem)] text-rose-400 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        );
+                      } else {
+                        baseStyle =
+                          "border-transparent bg-white/[0.01] text-slate-600 opacity-30 grayscale";
+                      }
                     }
-                  }
 
-                  return (
-                    <button
-                      key={index}
-                      disabled={hasAnswered}
-                      onClick={() => answerQuestion(currentQuestion.id, option)}
-                      className={`group w-full flex items-center justify-between p-[clamp(0.75rem,2dvh,1.25rem)] rounded-[1rem] sm:rounded-[1.25rem] border-2 transition-all duration-300 outline-none text-left ${baseStyle} ${!hasAnswered && "active:scale-[0.98]"}`}
-                    >
-                      <span className="text-[clamp(0.85rem,2.2dvh,1.1rem)] font-medium leading-[1.3] pr-4 line-clamp-4">
-                        {option}
-                      </span>
-                      {icon && (
-                        <span className="animate-in zoom-in duration-300">
-                          {icon}
+                    // Akıllı Şık Metni Boyutlandırması
+                    const optLen = option.length;
+                    let optTextSize =
+                      "text-[clamp(0.85rem,2.2dvh,1.1rem)] py-[clamp(0.75rem,2dvh,1.25rem)]";
+                    if (optLen > 80) {
+                      optTextSize =
+                        "text-[clamp(0.75rem,1.6dvh,0.9rem)] py-[clamp(0.5rem,1.5dvh,1rem)] leading-snug";
+                    } else if (optLen > 40) {
+                      optTextSize =
+                        "text-[clamp(0.8rem,1.9dvh,1rem)] py-[clamp(0.6rem,1.8dvh,1.1rem)] leading-snug";
+                    }
+
+                    return (
+                      <button
+                        key={index}
+                        disabled={hasAnswered}
+                        onClick={() =>
+                          answerQuestion(currentQuestion.id, option)
+                        }
+                        className={`group w-full flex items-center justify-between px-[clamp(0.75rem,2dvh,1.25rem)] rounded-[1rem] sm:rounded-[1.25rem] border-2 transition-all duration-300 outline-none text-left shrink-0 ${baseStyle} ${!hasAnswered && "active:scale-[0.98]"}`}
+                      >
+                        <span
+                          className={`font-medium pr-4 break-words ${optTextSize}`}
+                        >
+                          {option}
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                        {icon && (
+                          <span className="animate-in zoom-in duration-300 shrink-0 pl-2">
+                            {icon}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="shrink-0 pt-4 pb-2 flex items-center justify-between gap-4">
           <button
             onClick={prevQuestion}
             disabled={activeQuestionIndex === 0}
-            className="w-[3.5rem] h-[3.5rem] sm:w-[4rem] sm:h-[4rem] flex items-center justify-center bg-white/[0.05] rounded-full text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-20 transition-all border border-white/5 active:scale-95"
+            className="w-[3.5rem] h-[3.5rem] sm:w-[4rem] sm:h-[4rem] flex items-center justify-center shrink-0 bg-white/[0.05] rounded-full text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-20 transition-all border border-white/5 active:scale-95"
           >
             <svg
               className="w-6 h-6"
