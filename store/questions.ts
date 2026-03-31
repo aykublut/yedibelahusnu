@@ -413,7 +413,7 @@ export const mockQuestions: Question[] = [
       "D) Fırsatlar",
       "E) Görev tanımları",
     ],
-    correctAnswer: "C) Misyon",
+    correctAnswer: "E) Görev tanımları",
   },
   {
     id: 32,
