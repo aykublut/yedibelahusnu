@@ -89,6 +89,7 @@ export default function QuizApp() {
     );
   }
 
+  // === SONUÇ EKRANI (ŞABAN VİDEOLU) ===
   if (isQuizFinished) {
     const currentListWrongCount = currentQuestionsList.filter(
       (q) => userAnswers[q.id] !== q.correctAnswer,
@@ -97,33 +98,72 @@ export default function QuizApp() {
       currentQuestionsList.length - currentListWrongCount;
     const isPerfect = currentListWrongCount === 0;
 
+    // KEMAL SUNAL YOUTUBE ID'LERİ (Buradaki ID'leri kendi istediğin videoların ID'leri ile değiştirebilirsin)
+    // Şaban Hıyar Yeme (Örnek: d32f5R-7Tz8 vb.)
+    const hiyarVideoId = "zD1B1y7iNig";
+    // Şaban Gülme (Örnek: 7V2Xg5R8Y34 vb.)
+    const gulmeVideoId = "gXN_2i8jJvw";
+
     return (
-      <div className="h-[100dvh] w-full bg-[#030303] text-slate-200 flex items-center justify-center p-4 overflow-hidden relative">
+      <div className="h-[100dvh] w-full bg-[#030303] text-slate-200 flex flex-col items-center justify-center p-4 overflow-hidden relative">
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vh] opacity-20 blur-[120px] pointer-events-none transition-colors duration-1000 ${isPerfect ? "bg-[radial-gradient(circle,rgba(16,185,129,0.4)_0%,transparent_60%)]" : "bg-[radial-gradient(circle,rgba(99,102,241,0.4)_0%,transparent_60%)]"}`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vh] opacity-20 blur-[120px] pointer-events-none transition-colors duration-1000 ${isPerfect ? "bg-[radial-gradient(circle,rgba(16,185,129,0.4)_0%,transparent_60%)]" : "bg-[radial-gradient(circle,rgba(244,63,94,0.4)_0%,transparent_60%)]"}`}
         ></div>
-        <div className="w-full max-w-md z-10 flex flex-col gap-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tighter">
-              {isPerfect ? "KUSURSUZ!" : "RAPOR"}
+
+        <div className="w-full max-w-md z-10 flex flex-col gap-[clamp(1rem,2dvh,1.5rem)]">
+          {/* === VİDEO OYNATICI ALANI === */}
+          <div
+            className={`w-full aspect-[16/9] rounded-[2rem] overflow-hidden border-4 relative shrink-0 transition-shadow duration-700 ${isPerfect ? "border-emerald-500/40 shadow-[0_0_40px_rgba(16,185,129,0.25)]" : "border-rose-500/40 shadow-[0_0_40px_rgba(244,63,94,0.25)]"}`}
+          >
+            {isPerfect ? (
+              <video
+                autoPlay
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              >
+                <source src="/hiyar.mp4" type="video/mp4" />
+              </video>
+            ) : (
+              <video
+                autoPlay
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              >
+                <source src="/gulme.mp4" type="video/mp4" />
+              </video>
+            )}
+
+            {/* Videonun tasarıma uyması için üzerine atılan şık renk filtresi */}
+            <div
+              className={`absolute inset-0 mix-blend-overlay opacity-30 pointer-events-none ${isPerfect ? "bg-emerald-500" : "bg-rose-500"}`}
+            ></div>
+          </div>
+
+          {/* BAŞLIKLAR */}
+          <div className="text-center space-y-1 shrink-0">
+            <h1 className="text-[clamp(2rem,4dvh,2.5rem)] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tighter leading-tight">
+              {isPerfect ? "BRAVO! KUSURSUZ!" : "FULLEYEMEDİN..."}
             </h1>
-            <p className="text-sm font-medium text-slate-400">
-              {isWrongAnswersMode
-                ? "Hata ayıklama tamamlandı."
-                : "Test oturumu sona erdi."}
+            <p className="text-[clamp(0.85rem,1.8dvh,1rem)] font-medium text-slate-400">
+              {isPerfect
+                ? "Hıyar yemeyi hak ettin, Şaban seninle gurur duyuyor!"
+                : "Şaban senin bu duruma gülüyor, tekrar denemelisin!"}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/[0.03] border border-emerald-500/20 rounded-3xl p-6 text-center backdrop-blur-md">
-              <span className="text-4xl font-black text-emerald-400 block mb-1">
+
+          <div className="grid grid-cols-2 gap-3 shrink-0">
+            <div className="bg-white/[0.03] border border-emerald-500/20 rounded-3xl p-[clamp(1rem,2dvh,1.5rem)] text-center backdrop-blur-md">
+              <span className="text-[clamp(1.8rem,4dvh,2.25rem)] font-black text-emerald-400 block leading-none mb-1">
                 {currentListCorrectCount}
               </span>
               <span className="text-[10px] font-bold text-emerald-500/70 tracking-widest uppercase">
                 Doğru
               </span>
             </div>
-            <div className="bg-white/[0.03] border border-rose-500/20 rounded-3xl p-6 text-center backdrop-blur-md">
-              <span className="text-4xl font-black text-rose-400 block mb-1">
+            <div className="bg-white/[0.03] border border-rose-500/20 rounded-3xl p-[clamp(1rem,2dvh,1.5rem)] text-center backdrop-blur-md">
+              <span className="text-[clamp(1.8rem,4dvh,2.25rem)] font-black text-rose-400 block leading-none mb-1">
                 {currentListWrongCount}
               </span>
               <span className="text-[10px] font-bold text-rose-500/70 tracking-widest uppercase">
@@ -131,20 +171,21 @@ export default function QuizApp() {
               </span>
             </div>
           </div>
-          <div className="flex flex-col gap-3 mt-4">
+
+          <div className="flex flex-col gap-[clamp(0.5rem,1.2dvh,0.75rem)] shrink-0 mt-2">
             {currentListWrongCount > 0 && (
               <button
                 onClick={retryWrongAnswers}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all active:scale-[0.98] shadow-[0_0_30px_rgba(79,70,229,0.3)] flex items-center justify-center gap-2"
+                className="w-full py-[clamp(0.85rem,2.2dvh,1rem)] bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl transition-all active:scale-[0.98] shadow-[0_0_25px_rgba(225,29,72,0.3)] flex items-center justify-center gap-2"
               >
                 Sadece Yanlışları Çöz
               </button>
             )}
             <button
               onClick={restartQuiz}
-              className="w-full py-4 bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold rounded-2xl border border-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-[clamp(0.85rem,2.2dvh,1rem)] bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold rounded-2xl border border-white/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              Tüm Sistemi Sıfırla
+              Sistemi Sıfırla
             </button>
           </div>
         </div>
@@ -152,7 +193,7 @@ export default function QuizApp() {
     );
   }
 
-  // Akıllı Soru Metni Boyutlandırması
+  // === TEST EKRANI ===
   const qLen = currentQuestion?.questionText.length || 0;
   let qTextSize =
     "text-[clamp(1.1rem,2.8dvh,1.75rem)] mb-[clamp(1rem,3dvh,2.5rem)]";
@@ -176,7 +217,7 @@ export default function QuizApp() {
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[40vh] bg-indigo-600/10 blur-[100px] pointer-events-none rounded-full" />
 
-      {/* === ÜST BAR & KARIŞTIR BUTONU === */}
+      {/* ÜST BAR & KARIŞTIR BUTONU */}
       <div className="w-full max-w-3xl mx-auto px-4 pt-4 sm:pt-6 pb-2 flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-2">
           <span
@@ -215,11 +256,7 @@ export default function QuizApp() {
 
       <div className="flex-1 min-h-0 w-full max-w-3xl mx-auto flex flex-col px-4 pb-4 sm:px-6 z-10">
         <div className="flex-1 min-h-0 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-[clamp(1rem,3dvh,2.5rem)] flex flex-col shadow-2xl relative overflow-hidden">
-          {/* Çok uzun içeriklerde 100dvh bozmamak için overflow-y-auto eklendi */}
-          <div
-            className="flex-1 flex flex-col justify-center overflow-y-auto overscroll-contain pr-1 -mr-1 
-            [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20"
-          >
+          <div className="flex-1 flex flex-col justify-center overflow-y-auto overscroll-contain pr-1 -mr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20">
             {currentQuestion && (
               <>
                 <div className="shrink-0">
@@ -282,7 +319,6 @@ export default function QuizApp() {
                       }
                     }
 
-                    // Akıllı Şık Metni Boyutlandırması
                     const optLen = option.length;
                     let optTextSize =
                       "text-[clamp(0.85rem,2.2dvh,1.1rem)] py-[clamp(0.75rem,2dvh,1.25rem)]";
