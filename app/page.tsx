@@ -113,7 +113,7 @@ export default function QuizApp() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="/saban.mp4" type="video/mp4" />
+            <source src="/easteregg.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none mix-blend-overlay"></div>
         </div>
