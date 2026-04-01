@@ -23,6 +23,8 @@ export default function QuizApp() {
   } = useQuizStore();
 
   const [mounted, setMounted] = useState(false);
+  // YENİ: Easter Egg State'i
+  const [isEasterEggActive, setIsEasterEggActive] = useState(false);
 
   useEffect(() => {
     setQuestions(mockQuestions);
@@ -48,6 +50,15 @@ export default function QuizApp() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // === EASTER EGG TETİKLEYİCİSİ (Ö Tuşu) ===
+      if (e.key.toLowerCase() === "ö") {
+        setIsEasterEggActive((prev) => !prev);
+        return;
+      }
+
+      // Easter egg açıkken diğer tüm tuşları kilitle
+      if (isEasterEggActive) return;
+
       if (isQuizFinished || !currentQuestion) return;
       if (e.key === "ArrowRight" && hasAnswered) {
         isLastQuestion ? finishQuiz() : nextQuestion();
@@ -61,6 +72,7 @@ export default function QuizApp() {
       }
     },
     [
+      isEasterEggActive, // Yeni state'i dependency'e ekledik
       isQuizFinished,
       currentQuestion,
       hasAnswered,
@@ -78,6 +90,39 @@ export default function QuizApp() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // === YENİ: EASTER EGG ARAYÜZÜ (Her yerin üzerine binen katman) ===
+  const easterEggOverlay = isEasterEggActive && (
+    <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center p-4 overflow-hidden backdrop-blur-3xl animate-in fade-in duration-500">
+      {/* Çılgın Ambiyans Arka Planı (Neon / Siberpunk Hissi) */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(217,70,239,0.15)_0%,transparent_60%)] animate-pulse pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col items-center max-w-3xl w-full">
+        <h1 className="text-[clamp(1.5rem,4dvh,3rem)] font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 mb-[clamp(1rem,3dvh,2rem)] animate-bounce tracking-[0.2em] text-center">
+          GİZLİ BÖLÜM BULUNDU!
+        </h1>
+
+        {/* Easter Egg Video Alanı */}
+        <div className="w-full aspect-[16/9] rounded-[2rem] overflow-hidden border-[4px] sm:border-[6px] border-fuchsia-500/50 shadow-[0_0_80px_rgba(217,70,239,0.4)] relative">
+          <video
+            autoPlay
+            loop
+            playsInline // mobilde tam ekrana fırlamasın diye
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/easteregg.mp4" type="video/mp4" />
+          </video>
+          {/* Tarz katması için scanline efekti */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none mix-blend-overlay"></div>
+        </div>
+
+        <p className="mt-[clamp(1.5rem,4dvh,3rem)] text-[clamp(0.8rem,1.8dvh,1rem)] text-cyan-400/80 font-mono tracking-widest animate-pulse text-center">
+          Geri dönmek için tekrar [ Ö ] tuşuna bas
+        </p>
+      </div>
+    </div>
+  );
+
   if (!mounted || questions.length === 0) {
     return (
       <div className="h-[100dvh] w-full flex items-center justify-center bg-[#050505]">
@@ -89,7 +134,7 @@ export default function QuizApp() {
     );
   }
 
-  // === SONUÇ EKRANI (ŞABAN VİDEOLU) ===
+  // === SONUÇ EKRANI ===
   if (isQuizFinished) {
     const currentListWrongCount = currentQuestionsList.filter(
       (q) => userAnswers[q.id] !== q.correctAnswer,
@@ -98,20 +143,13 @@ export default function QuizApp() {
       currentQuestionsList.length - currentListWrongCount;
     const isPerfect = currentListWrongCount === 0;
 
-    // KEMAL SUNAL YOUTUBE ID'LERİ (Buradaki ID'leri kendi istediğin videoların ID'leri ile değiştirebilirsin)
-    // Şaban Hıyar Yeme (Örnek: d32f5R-7Tz8 vb.)
-    const hiyarVideoId = "zD1B1y7iNig";
-    // Şaban Gülme (Örnek: 7V2Xg5R8Y34 vb.)
-    const gulmeVideoId = "gXN_2i8jJvw";
-
     return (
       <div className="h-[100dvh] w-full bg-[#030303] text-slate-200 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+        {easterEggOverlay} {/* EASTER EGG BURAYA EKLENDİ */}
         <div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vh] opacity-20 blur-[120px] pointer-events-none transition-colors duration-1000 ${isPerfect ? "bg-[radial-gradient(circle,rgba(16,185,129,0.4)_0%,transparent_60%)]" : "bg-[radial-gradient(circle,rgba(244,63,94,0.4)_0%,transparent_60%)]"}`}
         ></div>
-
         <div className="w-full max-w-md z-10 flex flex-col gap-[clamp(1rem,2dvh,1.5rem)]">
-          {/* === VİDEO OYNATICI ALANI === */}
           <div
             className={`w-full aspect-[16/9] rounded-[2rem] overflow-hidden border-4 relative shrink-0 transition-shadow duration-700 ${isPerfect ? "border-emerald-500/40 shadow-[0_0_40px_rgba(16,185,129,0.25)]" : "border-rose-500/40 shadow-[0_0_40px_rgba(244,63,94,0.25)]"}`}
           >
@@ -134,14 +172,11 @@ export default function QuizApp() {
                 <source src="/gulme.mp4" type="video/mp4" />
               </video>
             )}
-
-            {/* Videonun tasarıma uyması için üzerine atılan şık renk filtresi */}
             <div
-              className={`absolute inset-0 mix-blend-overlay opacity-30 pointer-events-none ${isPerfect ? "bg-emerald-500" : "bg-rose-500"}`}
+              className={`absolute inset-0 mix-blend-overlay opacity-30 pointer-events-none z-10 ${isPerfect ? "bg-emerald-500" : "bg-rose-500"}`}
             ></div>
           </div>
 
-          {/* BAŞLIKLAR */}
           <div className="text-center space-y-1 shrink-0">
             <h1 className="text-[clamp(2rem,4dvh,2.5rem)] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tighter leading-tight">
               {isPerfect ? "BRAVO! KUSURSUZ!" : "FULLEYEMEDİN..."}
@@ -207,17 +242,15 @@ export default function QuizApp() {
 
   return (
     <div className="h-[100dvh] w-full bg-[#050505] text-slate-200 flex flex-col overflow-hidden relative selection:bg-indigo-500/30">
+      {easterEggOverlay} {/* EASTER EGG BURAYA DA EKLENDİ */}
       <div className="absolute top-0 left-0 w-full h-1 bg-white/5 z-50">
         <div
           className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)] transition-all duration-500 ease-out"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
-
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[40vh] bg-indigo-600/10 blur-[100px] pointer-events-none rounded-full" />
-
-      {/* ÜST BAR & KARIŞTIR BUTONU */}
       <div className="w-full max-w-3xl mx-auto px-4 pt-4 sm:pt-6 pb-2 flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-2">
           <span
@@ -253,7 +286,6 @@ export default function QuizApp() {
           {currentQuestionsList.length}
         </div>
       </div>
-
       <div className="flex-1 min-h-0 w-full max-w-3xl mx-auto flex flex-col px-4 pb-4 sm:px-6 z-10">
         <div className="flex-1 min-h-0 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-[clamp(1rem,3dvh,2.5rem)] flex flex-col shadow-2xl relative overflow-hidden">
           <div className="flex-1 flex flex-col justify-center overflow-y-auto overscroll-contain pr-1 -mr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20">
