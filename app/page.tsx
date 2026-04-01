@@ -23,10 +23,7 @@ export default function QuizApp() {
   } = useQuizStore();
 
   const [mounted, setMounted] = useState(false);
-  // YENİ: Easter Egg State'i
   const [isEasterEggActive, setIsEasterEggActive] = useState(false);
-  
-  // === YENİ: Şakalı Analiz Butonu State'i ===
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
@@ -47,10 +44,8 @@ export default function QuizApp() {
     ? ((activeQuestionIndex + 1) / currentQuestionsList.length) * 100 
     : 0;
 
-  // === YENİ: Sahte Yükleme (Fake Loading) ve Easter Egg Tetikleyici ===
   const handleFakeAnalyze = () => {
     setIsAnalyzing(true);
-    // 2.5 saniye sonra sahte yüklemeyi bitir ve mevcut Easter Egg'i aç
     setTimeout(() => {
       setIsAnalyzing(false);
       setIsEasterEggActive(true); 
@@ -59,13 +54,11 @@ export default function QuizApp() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      // === EASTER EGG TETİKLEYİCİSİ (Ö Tuşu) ===
       if (e.key.toLowerCase() === "ö") {
         setIsEasterEggActive((prev) => !prev);
         return;
       }
 
-      // Easter egg açıkken diğer tüm tuşları kilitle
       if (isEasterEggActive) return;
 
       if (isQuizFinished || !currentQuestion) return;
@@ -99,10 +92,8 @@ export default function QuizApp() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // === EASTER EGG ARAYÜZÜ (Her yerin üzerine binen katman) ===
   const easterEggOverlay = isEasterEggActive && (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center p-4 overflow-hidden backdrop-blur-3xl animate-in fade-in duration-500">
-      {/* Çılgın Ambiyans Arka Planı (Neon / Siberpunk Hissi) */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(217,70,239,0.15)_0%,transparent_60%)] animate-pulse pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
       
@@ -111,23 +102,33 @@ export default function QuizApp() {
           GİZLİ BÖLÜM BULUNDU!
         </h1>
 
-        {/* Easter Egg Video Alanı */}
         <div className="w-full aspect-[16/9] rounded-[2rem] overflow-hidden border-[4px] sm:border-[6px] border-fuchsia-500/50 shadow-[0_0_80px_rgba(217,70,239,0.4)] relative">
           <video 
             autoPlay 
             loop 
-            playsInline // mobilde tam ekrana fırlamasın diye
+            playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source src="/easteregg.mp4" type="video/mp4" />
           </video>
-          {/* Tarz katması için scanline efekti */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none mix-blend-overlay"></div>
         </div>
 
-        <p className="mt-[clamp(1.5rem,4dvh,3rem)] text-[clamp(0.8rem,1.8dvh,1rem)] text-cyan-400/80 font-mono tracking-widest animate-pulse text-center">
-          Geri dönmek için tekrar [ Ö ] tuşuna bas
-        </p>
+        {/* === YENİ: MOBİL İÇİN GERİ DÖNÜŞ BUTONU VE AÇIKLAMA === */}
+        <div className="mt-[clamp(1.5rem,4dvh,3rem)] flex flex-col items-center gap-4">
+          <p className="hidden sm:block text-[clamp(0.8rem,1.8dvh,1rem)] text-cyan-400/80 font-mono tracking-widest animate-pulse text-center">
+            Geri dönmek için tekrar [ Ö ] tuşuna bas
+          </p>
+          <button 
+            onClick={() => setIsEasterEggActive(false)}
+            className="px-6 py-3 bg-fuchsia-600/20 hover:bg-fuchsia-600/40 text-fuchsia-300 font-bold tracking-widest uppercase rounded-xl border-2 border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.3)] transition-all active:scale-95 flex items-center gap-2 backdrop-blur-md"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            SİSTEME GERİ DÖN
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -143,7 +144,6 @@ export default function QuizApp() {
     );
   }
 
-  // === SONUÇ EKRANI ===
   if (isQuizFinished) {
     const currentListWrongCount = currentQuestionsList.filter((q) => userAnswers[q.id] !== q.correctAnswer).length;
     const currentListCorrectCount = currentQuestionsList.length - currentListWrongCount;
@@ -204,7 +204,6 @@ export default function QuizApp() {
     );
   }
 
-  // === TEST EKRANI ===
   const qLen = currentQuestion?.questionText.length || 0;
   let qTextSize = "text-[clamp(1.1rem,2.8dvh,1.75rem)] mb-[clamp(1rem,3dvh,2.5rem)]";
   if (qLen > 250) {
@@ -230,7 +229,6 @@ export default function QuizApp() {
             {isWrongAnswersMode ? "Hata Modu" : "Aktif Test"}
           </span>
 
-          {/* === YENİ: ŞAKALI ANALİZ BUTONU BURAYA EKLENDİ === */}
           <button
             onClick={handleFakeAnalyze}
             disabled={isAnalyzing}
