@@ -106,7 +106,7 @@ export default function QuizApp() {
           GİZLİ BÖLÜM BULUNDU!
         </h1>
 
-        <div className="w-full aspect-[16/16] rounded-[2rem] overflow-hidden border-[4px] sm:border-[6px] border-fuchsia-500/50 shadow-[0_0_80px_rgba(217,70,239,0.4)] relative">
+        <div className="w-full aspect-[16/9] rounded-[2rem] overflow-hidden border-[4px] sm:border-[6px] border-fuchsia-500/50 shadow-[0_0_80px_rgba(217,70,239,0.4)] relative">
           <video
             autoPlay
             loop
