@@ -123,6 +123,9 @@ export default function QuizApp() {
           <p className="hidden sm:block text-[clamp(0.8rem,1.8dvh,1rem)] text-cyan-400/80 font-mono tracking-widest animate-pulse text-center">
             Geri dönmek için tekrar [ Ö ] tuşuna bas
           </p>
+          <p className="block sm:hidden text-[clamp(0.8rem,1.8dvh,1rem)] text-cyan-400/80 font-mono tracking-widest animate-pulse text-center">
+            1 NİSAN ŞAKASI
+          </p>
           <button
             onClick={() => setIsEasterEggActive(false)}
             className="px-6 py-3 bg-fuchsia-600/20 hover:bg-fuchsia-600/40 text-fuchsia-300 font-bold tracking-widest uppercase rounded-xl border-2 border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.3)] transition-all active:scale-95 flex items-center gap-2 backdrop-blur-md"
